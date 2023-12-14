@@ -4,16 +4,21 @@ const Hapi = require('@hapi/hapi');
 const ClientError = require('./exceptions/ClientError');
 
 const SongsService = require('./services/postgres/SongsService');
-const songsValidator = require('./validator/songs/index');
+const SongsValidator = require('./validator/songs/index');
 const songsPlugin = require('./api/songs/index');
 
 const AlbumsService = require('./services/postgres/AlbumsService');
-const albumsValidator = require('./validator/albums/index');
+const AlbumsValidator = require('./validator/albums/index');
 const albumsPlugin = require('./api/albums/index');
 
 const UsersService = require('./services/postgres/UsersService');
-const usersValidator = require('./validator/users/index');
+const UsersValidator = require('./validator/users/index');
 const usersPlugin = require('./api/users/index');
+
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications/index');
+const authenticationsPlugin = require('./api/authentications/index');
+const TokenManager = require('./tokenize/TokenManager');
 
 const init = async () => {
   const server = Hapi.server({
@@ -29,27 +34,37 @@ const init = async () => {
   const albumsServices = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
 
   await server.register([
     {
       plugin: songsPlugin,
       options: {
         service: songsService,
-        validator: songsValidator,
+        validator: SongsValidator,
       },
     },
     {
       plugin: albumsPlugin,
       options: {
         service: albumsServices,
-        validator: albumsValidator,
+        validator: AlbumsValidator,
       },
     },
     {
       plugin: usersPlugin,
       options: {
         service: usersService,
-        validator: usersValidator,
+        validator: UsersValidator,
+      },
+    },
+    {
+      plugin: authenticationsPlugin,
+      options: {
+        authenticationsService,
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthenticationsValidator,
       },
     },
   ]);

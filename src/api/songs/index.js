@@ -1,7 +1,7 @@
 const SongsHandler = require('./handler');
 const songRoutes = require('./routes');
 
-const songsPlugin = {
+const SongsPlugin = {
   name: 'songs',
   register: async (server, options) => {
     const songsHandler = new SongsHandler(options.service, options.validator);
@@ -10,4 +10,4 @@ const songsPlugin = {
   },
 };
 
-module.exports = songsPlugin;
+module.exports = SongsPlugin;
