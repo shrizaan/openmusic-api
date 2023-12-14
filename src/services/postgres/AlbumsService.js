@@ -2,9 +2,9 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
-const {mapDBAlbumToModel} = require("../../utils");
+const { mapDBAlbumToModel } = require('../../utils');
 
-class AlbumsServices {
+class AlbumsService {
   constructor() {
     this._pool = new Pool();
   }
@@ -83,4 +83,4 @@ class AlbumsServices {
   }
 }
 
-module.exports = AlbumsServices;
+module.exports = AlbumsService;
