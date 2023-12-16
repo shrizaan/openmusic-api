@@ -32,10 +32,10 @@ class PlaylistsService {
     const query = {
       text: `SELECT playlists.*
              FROM playlists
-                      LEFT JOIN collaborations ON collaborations.note_id = notes.id
-             WHERE notes.owner = $1
+                      LEFT JOIN collaborations ON collaborations.id = playlists.id
+             WHERE playlists.id = $1
                 OR collaborations.user_id = $1
-             GROUP BY notes.id`,
+             GROUP BY playlists.id`,
       values: [owner],
     };
 
@@ -95,7 +95,21 @@ class PlaylistsService {
     };
   }
 
-  async deleteSongFromPlaylist() {}
+  async deleteSongFromPlaylist(playlistId, songId) {
+    await this.searchPlaylist(playlistId);
+    await this.searchSong(songId);
+
+    const query = {
+      text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
+      values: [playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Failed to delete songs from playlist. Playlist ID or song ID not found.');
+    }
+  }
 
   async searchSong(songId) {
     const query = {
@@ -125,3 +139,5 @@ class PlaylistsService {
     return result.rows;
   }
 }
+
+module.exports = PlaylistsService;
