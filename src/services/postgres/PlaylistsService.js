@@ -43,16 +43,35 @@ class PlaylistsService {
     return result.rows;
   }
 
-  async deletePlaylist(owner, playlistId) {
+  async deletePlaylist(playlistId) {
     const query = {
-      text: 'DELETE FROM playlists WHERE owner = $1 AND id = $2 RETURNING id',
-      values: [owner, playlistId],
+      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
+      values: [playlistId],
     };
 
     const result = await this._pool.query(query);
 
     if (!result.rows.length) {
       throw new NotFoundError('Playlist failed to delete. ID not found.');
+    }
+  }
+
+  async verifyPlaylistOwner(playlistId, owner) {
+    const query = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [playlistId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist not found.');
+    }
+
+    const playlist = result.rows[0];
+
+    if (playlist.owner !== owner) {
+      throw new AuthorizationError('You are not authorized to access this resource.');
     }
   }
 }
