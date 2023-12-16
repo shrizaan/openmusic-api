@@ -22,7 +22,7 @@ class PlaylistSongsService {
     }
   }
 
-  async getSongsFromPlaylists(playlistId) {
+  async getSongsFromPlaylist(playlistId) {
     const querySearchPlaylist = {
       text: 'SELECT * FROM playlists WHERE id = $1',
       values: [playlistId],
