@@ -41,7 +41,11 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    return result.rows;
+    return result.rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      username: r.owner,
+    }));
   }
 
   async deletePlaylist(playlistId) {
@@ -70,9 +74,23 @@ class PlaylistsService {
     }
 
     const playlist = result.rows[0];
+    console.log(owner);
 
     if (playlist.owner !== owner) {
+      console.trace(playlist.owner !== owner);
       throw new AuthorizationError('You are not authorized to access this resource.');
+    }
+  }
+
+  async verifyPlaylistAccess(playlistId, owner) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, owner);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      throw error;
+      // TODO: Belum menambahkan verifyCollaborator di CollaborationsService
     }
   }
 }

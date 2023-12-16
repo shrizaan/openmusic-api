@@ -10,11 +10,13 @@ class PlaylistsHandler {
     const { name } = request.payload;
     const { id: credentialId } = request.auth.credentials;
 
-    const id = await this._service.addPlaylist({ name, credentialId });
+    const id = await this._service.addPlaylist({ name, owner: credentialId });
 
     const response = h.response({
       status: 'success',
-      playlistId: id,
+      data: {
+        playlistId: id,
+      },
     });
     response.code(201);
     return response;
@@ -27,17 +29,19 @@ class PlaylistsHandler {
 
     return {
       status: 'success',
-      data: playlists,
+      data: {
+        playlists,
+      },
     };
   }
 
   async deletePlaylistHandler(request) {
     const { id: credentialId } = request.auth.credentials;
-    const playlistId = request.params;
+    const { id: playlistId } = request.params;
 
     await this._service.verifyPlaylistOwner(playlistId, credentialId);
 
-    await this._service.deletePlaylist(credentialId, playlistId);
+    await this._service.deletePlaylist(playlistId);
 
     return {
       status: 'success',
