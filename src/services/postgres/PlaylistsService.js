@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
   constructor() {
@@ -33,7 +34,7 @@ class PlaylistsService {
       text: `SELECT playlists.*
              FROM playlists
                       LEFT JOIN collaborations ON collaborations.id = playlists.id
-             WHERE playlists.id = $1
+             WHERE playlists.owner = $1
                 OR collaborations.user_id = $1
              GROUP BY playlists.id`,
       values: [owner],
