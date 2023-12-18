@@ -43,7 +43,7 @@ class PlaylistSongsHandler {
     };
   }
 
-  async deleteSongFromPlaylistHandler(request, h) {
+  async deleteSongFromPlaylistHandler(request) {
     this._validator.validatePlaylistSongsPayload(request.payload);
 
     const { id: playlistId } = request.params;

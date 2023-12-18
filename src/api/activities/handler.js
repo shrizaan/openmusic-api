@@ -3,7 +3,7 @@ class PlaylistActivities {
     this._service = service;
   }
 
-  async getPlaylistActivitiesHandler(request, h) {
+  async getPlaylistActivitiesHandler(request) {
     const { id: playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
