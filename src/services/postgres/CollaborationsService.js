@@ -9,6 +9,16 @@ class CollaborationsService {
   }
 
   async addCollaboration(playlistId, userId) {
+    const querySearchUser = {
+      text: 'SELECT * FROM users WHERE id = $1',
+      values: [userId],
+    };
+
+    const resultSearchUser = await this._pool.query(querySearchUser);
+    if (!resultSearchUser.rows.length) {
+      throw new NotFoundError('User ID not found.');
+    }
+
     const id = `collab-${nanoid(16)}`;
 
     const query = {

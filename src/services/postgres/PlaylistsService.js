@@ -5,8 +5,9 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor() {
+  constructor(collaborationsService) {
     this._pool = new Pool();
+    this._collaborationsService = collaborationsService;
   }
 
   async addPlaylist({
@@ -28,20 +29,15 @@ class PlaylistsService {
     return result.rows[0].id;
   }
 
-  // TODO: Sepertinya masih salah
   async getPlaylists(owner) {
-    // const query = {
-    //   text: `SELECT playlists.*
-    //          FROM playlists
-    //                   LEFT JOIN collaborations ON collaborations.id = playlists.id
-    //          WHERE playlists.owner = $1
-    //             OR collaborations.user_id = $1
-    //          GROUP BY playlists.id`,
-    //   values: [owner],
-    // };
-
     const query = {
-      text: 'SELECT playlists.id AS id, playlists.name AS name, users.username AS username FROM playlists JOIN users ON users.id = playlists.owner WHERE users.id = $1',
+      text: `SELECT playlists.id AS id, playlists.name AS name, users.username AS username
+             FROM playlists
+                      JOIN users ON users.id = playlists.owner
+                      LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
+             WHERE playlists.owner = $1
+                OR collaborations.user_id = $1
+             GROUP BY playlists.id, users.username`,
       values: [owner],
     };
 
@@ -79,23 +75,24 @@ class PlaylistsService {
     }
 
     const playlist = result.rows[0];
-    console.log(owner);
 
     if (playlist.owner !== owner) {
-      console.trace(playlist.owner !== owner);
       throw new AuthorizationError('You are not authorized to access this resource.');
     }
   }
 
-  async verifyPlaylistAccess(playlistId, owner) {
+  async verifyPlaylistAccess(playlistId, userId) {
     try {
-      await this.verifyPlaylistOwner(playlistId, owner);
+      await this.verifyPlaylistOwner(playlistId, userId);
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      throw error;
-      // TODO: Belum menambahkan verifyCollaborator di CollaborationsService
+      try {
+        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+      } catch {
+        throw error;
+      }
     }
   }
 }

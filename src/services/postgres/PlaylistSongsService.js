@@ -44,7 +44,6 @@ class PlaylistSongsService {
     };
 
     const resultInsertSong = await this._pool.query(queryInsertSong);
-    console.trace('masuk ke post database', resultInsertSong.rows);
 
     if (!resultInsertSong.rows.length) {
       throw new InvariantError('Failed to add song to the playlist.');
@@ -60,7 +59,6 @@ class PlaylistSongsService {
     };
 
     const playlistQueryResult = await this._pool.query(querySearchPlaylist);
-    console.trace(playlistQueryResult.rows);
 
     if (!playlistQueryResult.rows.length) {
       throw new NotFoundError('Playlist ID not found.');
