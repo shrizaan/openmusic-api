@@ -1,14 +1,41 @@
-const Hapi = require('@hapi/hapi');
-const dotenv = require('dotenv');
-const ClientError = require('./exceptions/ClientError');
-const albumsValidator = require('./validator/albums/index');
-const songsValidator = require('./validator/songs/index');
-const albumsPlugin = require('./api/albums/index');
-const songsPlugin = require('./api/songs/index');
-const SongsServices = require('./services/postgres/SongsServices');
-const AlbumsServices = require('./services/postgres/AlbumsServices');
+require('dotenv').config();
 
-dotenv.config();
+const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
+
+const ClientError = require('./exceptions/ClientError');
+
+const SongsService = require('./services/postgres/SongsService');
+const SongsValidator = require('./validator/songs/index');
+const songsPlugin = require('./api/songs/index');
+
+const AlbumsService = require('./services/postgres/AlbumsService');
+const AlbumsValidator = require('./validator/albums/index');
+const albumsPlugin = require('./api/albums/index');
+
+const UsersService = require('./services/postgres/UsersService');
+const UsersValidator = require('./validator/users/index');
+const usersPlugin = require('./api/users/index');
+
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications/index');
+const authenticationsPlugin = require('./api/authentications/index');
+const TokenManager = require('./tokenize/TokenManager');
+
+const PlaylistsService = require('./services/postgres/PlaylistsService');
+const PlaylistsValidator = require('./validator/playlists/index');
+const playlistsPlugin = require('./api/playlists/index');
+
+const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
+const PlaylistSongsValidator = require('./validator/playlist-songs');
+const playlistSongsPlugin = require('./api/playlist-songs');
+
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations/index');
+const collaborationsPlugin = require('./api/collaborations/index');
+
+const PlaylistActivitiesService = require('./services/postgres/PlaylistActivitiesService');
+const playlistActivitiesPlugin = require('./api/activities/index');
 
 const init = async () => {
   const server = Hapi.server({
@@ -21,22 +48,95 @@ const init = async () => {
     },
   });
 
-  const albumsServices = new AlbumsServices();
-  const songsServices = new SongsServices();
+  const albumsServices = new AlbumsService();
+  const songsService = new SongsService();
+  const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
+  const collaborationsService = new CollaborationsService();
+  const playlistsService = new PlaylistsService(collaborationsService);
+  const playlistSongsService = new PlaylistSongsService(playlistsService);
+  const playlistActivitiesService = new PlaylistActivitiesService(playlistsService);
+
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  server.auth.strategy('musicapi_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
+  });
 
   await server.register([
     {
       plugin: songsPlugin,
       options: {
-        service: songsServices,
-        validator: songsValidator,
+        service: songsService,
+        validator: SongsValidator,
       },
     },
     {
       plugin: albumsPlugin,
       options: {
         service: albumsServices,
-        validator: albumsValidator,
+        validator: AlbumsValidator,
+      },
+    },
+    {
+      plugin: usersPlugin,
+      options: {
+        service: usersService,
+        validator: UsersValidator,
+      },
+    },
+    {
+      plugin: authenticationsPlugin,
+      options: {
+        authenticationsService,
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthenticationsValidator,
+      },
+    },
+    {
+      plugin: playlistsPlugin,
+      options: {
+        service: playlistsService,
+        validator: PlaylistsValidator,
+      },
+    },
+    {
+      plugin: playlistSongsPlugin,
+      options: {
+        playlistSongsService,
+        playlistActivitiesService,
+        validator: PlaylistSongsValidator,
+      },
+    },
+    {
+      plugin: playlistActivitiesPlugin,
+      options: {
+        service: playlistActivitiesService,
+      },
+    },
+    {
+      plugin: collaborationsPlugin,
+      options: {
+        collaborationsService,
+        playlistsService,
+        validator: CollaborationsValidator,
       },
     },
   ]);
