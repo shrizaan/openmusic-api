@@ -30,13 +30,18 @@ class PlaylistsService {
 
   // TODO: Sepertinya masih salah
   async getPlaylists(owner) {
+    // const query = {
+    //   text: `SELECT playlists.*
+    //          FROM playlists
+    //                   LEFT JOIN collaborations ON collaborations.id = playlists.id
+    //          WHERE playlists.owner = $1
+    //             OR collaborations.user_id = $1
+    //          GROUP BY playlists.id`,
+    //   values: [owner],
+    // };
+
     const query = {
-      text: `SELECT playlists.*
-             FROM playlists
-                      LEFT JOIN collaborations ON collaborations.id = playlists.id
-             WHERE playlists.owner = $1
-                OR collaborations.user_id = $1
-             GROUP BY playlists.id`,
+      text: 'SELECT playlists.id AS id, playlists.name AS name, users.username AS username FROM playlists JOIN users ON users.id = playlists.owner WHERE users.id = $1',
       values: [owner],
     };
 
@@ -44,7 +49,7 @@ class PlaylistsService {
     return result.rows.map((r) => ({
       id: r.id,
       name: r.name,
-      username: r.owner,
+      username: r.username,
     }));
   }
 
