@@ -6,7 +6,6 @@ class CollaborationsHandler {
   }
 
   async postCollaborationHandler(request, h) {
-    console.log('masuk ke post handler');
     this._validator.validateCollaborationPayload(request.payload);
 
     const { playlistId, userId } = request.payload;
