@@ -24,7 +24,6 @@ class PlaylistSongsService {
       throw new NotFoundError('Song not found.');
     }
 
-    // Check if song is already in the playlist
     const queryCheckPlaylistSong = {
       text: 'SELECT * FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
       values: [playlistId, songId],
