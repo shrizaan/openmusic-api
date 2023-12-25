@@ -51,7 +51,7 @@ class SongsService {
     if (!result.rows.length) {
       throw new NotFoundError('Song not found.');
     }
-    
+
     return result.rows.map(mapDBSongToModel)[0];
   }
 
