@@ -8,10 +8,11 @@ class ExportHandler {
   async postExportPlaylist(request, h) {
     this._validator.validateExportPlaylistsPayload(request.payload);
 
-    const { id: userId } = request.payload.credentials;
+    const { id: userId } = request.auth.credentials;
+    const { id: playlistId } = request.params;
     const { targetEmail } = request.payload;
     const message = {
-      userId,
+      playlistId,
       targetEmail,
     };
 
