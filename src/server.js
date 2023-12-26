@@ -5,37 +5,50 @@ const Jwt = require('@hapi/jwt');
 
 const ClientError = require('./exceptions/ClientError');
 
+// Song Plugin
 const SongsService = require('./services/postgres/SongsService');
 const SongsValidator = require('./validator/songs/index');
 const songsPlugin = require('./api/songs/index');
 
+// Album Plugin
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums/index');
 const albumsPlugin = require('./api/albums/index');
 
+// User Plugin
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users/index');
 const usersPlugin = require('./api/users/index');
 
+// Authentication Plugin
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications/index');
 const authenticationsPlugin = require('./api/authentications/index');
 const TokenManager = require('./tokenize/TokenManager');
 
+// Playlist Plugin
 const PlaylistsService = require('./services/postgres/PlaylistsService');
 const PlaylistsValidator = require('./validator/playlists/index');
 const playlistsPlugin = require('./api/playlists/index');
 
+// PlaylistSong Plugin
 const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
 const PlaylistSongsValidator = require('./validator/playlist-songs');
 const playlistSongsPlugin = require('./api/playlist-songs');
 
+// Collaboration Plugin
 const CollaborationsService = require('./services/postgres/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations/index');
 const collaborationsPlugin = require('./api/collaborations/index');
 
+// PlaylistActivities Plugin
 const PlaylistActivitiesService = require('./services/postgres/PlaylistActivitiesService');
 const playlistActivitiesPlugin = require('./api/activities/index');
+
+// Export Plugin
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportValidator = require('./validator/export/index');
+const exportPlugin = require('./api/export/index');
 
 const init = async () => {
   const server = Hapi.server({
@@ -137,6 +150,13 @@ const init = async () => {
         collaborationsService,
         playlistsService,
         validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: exportPlugin,
+      options: {
+        producerService: ProducerService,
+        validator: ExportValidator,
       },
     },
   ]);
