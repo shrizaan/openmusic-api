@@ -19,6 +19,14 @@ const albumsRoutes = (handler) => [
     path: '/albums/{id}',
     handler: (request, h) => handler.deleteAlbumByIdHandler(request, h),
   },
+  {
+    method: 'POST',
+    path: '/albums/{id}/covers',
+    handler: (request, h) => handler.postAlbumCoverByIdHander(request, h),
+    options: {
+
+    },
+  },
 ];
 
 module.exports = albumsRoutes;

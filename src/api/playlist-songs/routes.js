@@ -2,7 +2,7 @@ const routes = (handler) => [
   {
     method: 'POST',
     path: '/playlists/{id}/songs',
-    handler: (request, h) => handler.postSongToPlaylistHandler(request, h),
+    handler: (request, h) => handler.postSongToPlaylistByIdHandler(request, h),
     options: {
       auth: 'musicapi_jwt',
     },
@@ -10,7 +10,7 @@ const routes = (handler) => [
   {
     method: 'GET',
     path: '/playlists/{id}/songs',
-    handler: (request, h) => handler.getSongsFromPlaylistHandler(request, h),
+    handler: (request, h) => handler.getSongsFromPlaylistByIdHandler(request, h),
     options: {
       auth: 'musicapi_jwt',
     },
@@ -18,7 +18,7 @@ const routes = (handler) => [
   {
     method: 'DELETE',
     path: '/playlists/{id}/songs',
-    handler: (request, h) => handler.deleteSongFromPlaylistHandler(request, h),
+    handler: (request, h) => handler.deleteSongFromPlaylistByIdHandler(request, h),
     options: {
       auth: 'musicapi_jwt',
     },
