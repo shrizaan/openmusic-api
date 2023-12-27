@@ -3,8 +3,10 @@ const albumsRoutes = require('./routes');
 
 const AlbumsPlugin = {
   name: 'albums',
-  register: async (server, options) => {
-    const albumsHandler = new AlbumsHandler(options.service, options.validator);
+  register: async (server, {
+    albumsService, storageService, albumsValidator, uploadValidator,
+  }) => {
+    const albumsHandler = new AlbumsHandler(albumsService, storageService, albumsValidator, uploadValidator);
 
     server.route(albumsRoutes(albumsHandler));
   },

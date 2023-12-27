@@ -24,7 +24,12 @@ const albumsRoutes = (handler) => [
     path: '/albums/{id}/covers',
     handler: (request, h) => handler.postAlbumCoverByIdHander(request, h),
     options: {
-
+      payload: {
+        allow: 'multipart/form-data',
+        multipart: true,
+        output: 'stream',
+        maxBytes: 512000,
+      },
     },
   },
 ];

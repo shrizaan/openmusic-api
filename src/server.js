@@ -11,6 +11,9 @@ const SongsValidator = require('./validator/songs/index');
 const songsPlugin = require('./api/songs/index');
 
 // Album Plugin
+const StorageService = require('./services/storage/StorageService');
+const UploadValidator = require('./validator/upload/index');
+
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums/index');
 const albumsPlugin = require('./api/albums/index');
@@ -61,6 +64,7 @@ const init = async () => {
     },
   });
 
+  const storageService = new StorageService();
   const albumsServices = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
@@ -103,8 +107,10 @@ const init = async () => {
     {
       plugin: albumsPlugin,
       options: {
-        service: albumsServices,
-        validator: AlbumsValidator,
+        albumsServices,
+        storageService,
+        albumsValidator: AlbumsValidator,
+        uploadValidator: UploadValidator,
       },
     },
     {
