@@ -40,7 +40,11 @@ class AlbumsService {
       throw new NotFoundError('Album not found.');
     }
 
-    return result.rows.map(mapDBAlbumToModel)[0];
+    return result.rows.map(({
+      id, name, year, cover,
+    }) => ({
+      id, name, year, coverUrl: cover,
+    }))[0];
   }
 
   async getAllSongsFromAlbum(id) {
@@ -54,12 +58,19 @@ class AlbumsService {
     return result.rows;
   }
 
-  async editAlbumById(id, { name, year }) {
+  async editAlbumById(id, { name, year, cover }) {
     const updatedAt = new Date().toISOString();
 
     const query = {
-      text: 'UPDATE albums SET name=$1, year=$2, updated_at=$3 WHERE id=$4 RETURNING id',
-      values: [name, year, updatedAt, id],
+      text: `
+      UPDATE albums
+      SET name = COALESCE($1, name),
+          year = COALESCE($2, year),
+          updated_at = $3,
+          cover = COALESCE($4, cover)
+      WHERE id = $5 RETURNING id
+    `,
+      values: [name, year, updatedAt, cover, id],
     };
 
     const result = await this._pool.query(query);

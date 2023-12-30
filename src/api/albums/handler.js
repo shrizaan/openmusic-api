@@ -22,12 +22,17 @@ class AlbumsHandler {
     return response;
   }
 
-  async postAlbumCoverByIdHander(request, h) {
-    const { data } = request.payload;
+  async postAlbumCoverByIdHandler(request, h) {
+    const { cover } = request.payload;
+    const { id: albumId } = request.params;
 
-    this._storageService.validateImageHeaders(data.hapi.headers);
+    this._uploadValidator.validateImageHeaders(cover.hapi.headers);
 
-    await this._uploadValidator.writeFile(data, data.hapi);
+    const filename = await this._storageService.writeFile(cover, cover.hapi);
+
+    const fileUrl = `http://${process.env.HOST}:${process.env.PORT}/albums/covers/${filename}`;
+
+    await this._albumsService.editAlbumById(albumId, { cover: fileUrl });
 
     const response = h.response({
       status: 'success',
@@ -48,7 +53,7 @@ class AlbumsHandler {
       data: {
         album: {
           ...album,
-          songs,
+          songs: [...songs],
         },
       },
     });
@@ -59,10 +64,10 @@ class AlbumsHandler {
   async putAlbumByIdHandler(request, h) {
     this._albumsValidator.validateAlbumPayload(request.payload);
 
-    const { name, year } = request.payload;
+    const { name, year, cover } = request.payload;
     const { id } = request.params;
 
-    await this._albumsService.editAlbumById(id, { name, year });
+    await this._albumsService.editAlbumById(id, { name, year, cover });
 
     const response = h.response({
       status: 'success',

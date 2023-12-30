@@ -2,7 +2,9 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
 
+const path = require('path');
 const ClientError = require('./exceptions/ClientError');
 
 // Song Plugin
@@ -64,8 +66,8 @@ const init = async () => {
     },
   });
 
-  const storageService = new StorageService();
-  const albumsServices = new AlbumsService();
+  const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/images/'));
+  const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
@@ -77,6 +79,9 @@ const init = async () => {
   await server.register([
     {
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -107,7 +112,7 @@ const init = async () => {
     {
       plugin: albumsPlugin,
       options: {
-        albumsServices,
+        albumsService,
         storageService,
         albumsValidator: AlbumsValidator,
         uploadValidator: UploadValidator,
@@ -180,7 +185,6 @@ const init = async () => {
         newResponse.code(response.statusCode);
         return newResponse;
       }
-
       if (!response.isServer) {
         return h.continue;
       }
