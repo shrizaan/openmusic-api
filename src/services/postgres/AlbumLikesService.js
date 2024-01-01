@@ -12,7 +12,7 @@ class AlbumLikesService {
     const id = `album-likes-${nanoid(16)}`;
 
     const query = {
-      text: 'INSERT INTO album_likes(id, user_id, album_id) VALUES($1, $2) RETURNING id',
+      text: 'INSERT INTO album_likes(id, user_id, album_id) VALUES($1, $2, $3) RETURNING id',
       values: [id, userId, albumId],
     };
 

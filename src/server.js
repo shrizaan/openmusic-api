@@ -55,6 +55,10 @@ const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportValidator = require('./validator/export/index');
 const exportPlugin = require('./api/export/index');
 
+// Album Likes Plugin
+const AlbumLikesService = require('./services/postgres/AlbumLikesService');
+const albumLikesPlugin = require('./api/album-likes/index');
+
 const init = async () => {
   const server = Hapi.server({
     host: process.env.HOST,
@@ -75,6 +79,7 @@ const init = async () => {
   const playlistsService = new PlaylistsService(collaborationsService);
   const playlistSongsService = new PlaylistSongsService(playlistsService);
   const playlistActivitiesService = new PlaylistActivitiesService(playlistsService);
+  const albumLikesService = new AlbumLikesService();
 
   await server.register([
     {
@@ -169,6 +174,12 @@ const init = async () => {
         producerService: ProducerService,
         playlistsService,
         validator: ExportValidator,
+      },
+    },
+    {
+      plugin: albumLikesPlugin,
+      options: {
+        albumLikesService,
       },
     },
   ]);
