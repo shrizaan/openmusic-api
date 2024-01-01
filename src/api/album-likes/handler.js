@@ -18,7 +18,7 @@ class AlbumLikesHandler {
   }
 
   async getAlbumLikesByIdHandler(request, h) {
-    const { id: albumId } = request.paramss;
+    const { id: albumId } = request.params;
 
     const result = await this._albumLikesService.getAlbumLikes(albumId);
 
