@@ -2,7 +2,6 @@ const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
-const { mapDBAlbumToModel } = require('../../utils');
 
 class AlbumsService {
   constructor() {
@@ -41,9 +40,9 @@ class AlbumsService {
     }
 
     return result.rows.map(({
-      id, name, year, cover,
+      id: albumId, name, year, cover,
     }) => ({
-      id, name, year, coverUrl: cover,
+      id: albumId, name, year, coverUrl: cover,
     }))[0];
   }
 

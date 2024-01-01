@@ -6,7 +6,12 @@ const AlbumsPlugin = {
   register: async (server, {
     albumsService, storageService, albumsValidator, uploadValidator,
   }) => {
-    const albumsHandler = new AlbumsHandler(albumsService, storageService, albumsValidator, uploadValidator);
+    const albumsHandler = new AlbumsHandler(
+      albumsService,
+      storageService,
+      albumsValidator,
+      uploadValidator,
+    );
 
     server.route(albumsRoutes(albumsHandler));
   },
