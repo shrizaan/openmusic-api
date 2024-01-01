@@ -12,6 +12,11 @@ exports.up = (pgm) => {
       type: 'VARCHAR(50)',
       notNull: true,
     },
+    created_at: {
+      type: 'timestamp',
+      notNull: true,
+      default: pgm.func('current_timestamp'),
+    },
   });
 
   pgm.addConstraint('album_likes', 'unique_user_id_album_id', 'UNIQUE(user_id, album_id)');
