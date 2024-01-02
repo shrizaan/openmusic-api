@@ -87,7 +87,7 @@ const init = async () => {
 
   const playlistsService = new PlaylistsService(collaborationsService, cacheService);
   const playlistSongsService = new PlaylistSongsService(playlistsService, cacheService);
-  const playlistActivitiesService = new PlaylistActivitiesService(playlistsService);
+  const playlistActivitiesService = new PlaylistActivitiesService(playlistsService, cacheService);
 
   await server.register([
     {

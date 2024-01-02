@@ -4,3 +4,4 @@ erd_img.png
 .env
 .idea
 .vscode
+src/api/albums/file

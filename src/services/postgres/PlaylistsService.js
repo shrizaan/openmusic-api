@@ -74,6 +74,7 @@ class PlaylistsService {
     }
 
     await this._cacheService.delete(`playlist-songs:${credentialId}-${playlistId}`);
+    await this._cacheService.delete(`playlists-activities:${credentialId}-${playlistId}`);
     await this._cacheService.delete(`playlists:${credentialId}`);
   }
 
