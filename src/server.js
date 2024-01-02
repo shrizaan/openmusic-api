@@ -59,6 +59,9 @@ const exportPlugin = require('./api/export/index');
 const AlbumLikesService = require('./services/postgres/AlbumLikesService');
 const albumLikesPlugin = require('./api/album-likes/index');
 
+// Cache Service
+const CacheService = require('./services/redis/CacheService');
+
 const init = async () => {
   const server = Hapi.server({
     host: process.env.HOST,
@@ -71,15 +74,17 @@ const init = async () => {
   });
 
   const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/images/'));
+  const cacheService = new CacheService();
+
   const albumsService = new AlbumsService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
   const playlistsService = new PlaylistsService(collaborationsService);
-  const playlistSongsService = new PlaylistSongsService(playlistsService);
+  const playlistSongsService = new PlaylistSongsService(playlistsService, cacheService);
   const playlistActivitiesService = new PlaylistActivitiesService(playlistsService);
-  const albumLikesService = new AlbumLikesService();
+  const albumLikesService = new AlbumLikesService(cacheService);
 
   await server.register([
     {

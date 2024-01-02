@@ -25,9 +25,14 @@ class AlbumLikesHandler {
     const response = h.response({
       status: 'success',
       data: {
-        likes: result,
+        likes: result.result,
       },
     });
+
+    if (result.fromCache) {
+      response.header('X-Data-Source', 'cache');
+    }
+
     response.code(200);
     return response;
   }
