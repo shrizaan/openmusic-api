@@ -27,27 +27,38 @@ class PlaylistsService {
       throw new InvariantError('Failed to add playlist');
     }
 
+    await this._cacheService.delete(`playlists:${owner}`);
+
     return result.rows[0].id;
   }
 
   async getPlaylists(owner) {
-    const query = {
-      text: `SELECT playlists.id AS id, playlists.name AS name, users.username AS username
+    try {
+      const result = await this._cacheService.get(`playlists:${owner}`);
+      return JSON.parse(result);
+    } catch (error) {
+      const query = {
+        text: `SELECT playlists.id AS id, playlists.name AS name, users.username AS username
              FROM playlists
                       JOIN users ON users.id = playlists.owner
                       LEFT JOIN collaborations ON collaborations.playlist_id = playlists.id
              WHERE playlists.owner = $1
                 OR collaborations.user_id = $1
              GROUP BY playlists.id, users.username`,
-      values: [owner],
-    };
+        values: [owner],
+      };
 
-    const result = await this._pool.query(query);
-    return result.rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      username: r.username,
-    }));
+      const result = await this._pool.query(query);
+      const mappedResult = result.rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        username: r.username,
+      }));
+
+      await this._cacheService.set(`playlists:${owner}`, JSON.stringify(mappedResult));
+
+      return mappedResult;
+    }
   }
 
   async deletePlaylist(playlistId, credentialId) {
@@ -63,6 +74,7 @@ class PlaylistsService {
     }
 
     await this._cacheService.delete(`playlist-songs:${credentialId}-${playlistId}`);
+    await this._cacheService.delete(`playlists:${credentialId}`);
   }
 
   async verifyPlaylistOwner(playlistId, owner) {
