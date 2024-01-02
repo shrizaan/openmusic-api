@@ -5,9 +5,10 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
-  constructor(collaborationsService) {
+  constructor(collaborationsService, cacheService) {
     this._pool = new Pool();
     this._collaborationsService = collaborationsService;
+    this._cacheService = cacheService;
   }
 
   async addPlaylist({
@@ -49,7 +50,7 @@ class PlaylistsService {
     }));
   }
 
-  async deletePlaylist(playlistId) {
+  async deletePlaylist(playlistId, credentialId) {
     const query = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
       values: [playlistId],
@@ -60,6 +61,8 @@ class PlaylistsService {
     if (!result.rows.length) {
       throw new NotFoundError('Playlist failed to delete. ID not found.');
     }
+
+    await this._cacheService.delete(`playlist-songs:${credentialId}-${playlistId}`);
   }
 
   async verifyPlaylistOwner(playlistId, owner) {

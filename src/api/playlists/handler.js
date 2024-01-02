@@ -41,7 +41,7 @@ class PlaylistsHandler {
 
     await this._service.verifyPlaylistOwner(playlistId, credentialId);
 
-    await this._service.deletePlaylist(playlistId);
+    await this._service.deletePlaylist(playlistId, credentialId);
 
     return {
       status: 'success',

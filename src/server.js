@@ -5,6 +5,7 @@ const Jwt = require('@hapi/jwt');
 const Inert = require('@hapi/inert');
 
 const path = require('path');
+const config = require('./utils/config');
 const ClientError = require('./exceptions/ClientError');
 
 // Song Plugin
@@ -64,8 +65,8 @@ const CacheService = require('./services/redis/CacheService');
 
 const init = async () => {
   const server = Hapi.server({
-    host: process.env.HOST,
-    port: process.env.PORT,
+    host: config.app.host,
+    port: config.app.port,
     routes: {
       cors: {
         origin: ['*'],
@@ -77,14 +78,16 @@ const init = async () => {
   const cacheService = new CacheService();
 
   const albumsService = new AlbumsService();
+  const albumLikesService = new AlbumLikesService(cacheService);
   const songsService = new SongsService();
+
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
-  const playlistsService = new PlaylistsService(collaborationsService);
+
+  const playlistsService = new PlaylistsService(collaborationsService, cacheService);
   const playlistSongsService = new PlaylistSongsService(playlistsService, cacheService);
   const playlistActivitiesService = new PlaylistActivitiesService(playlistsService);
-  const albumLikesService = new AlbumLikesService(cacheService);
 
   await server.register([
     {
@@ -101,7 +104,7 @@ const init = async () => {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.jwt.accessTokenAge,
     },
     validate: (artifacts) => ({
       isValid: true,

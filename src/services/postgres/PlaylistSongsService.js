@@ -31,12 +31,12 @@ class PlaylistSongsService {
       throw new InvariantError('Failed to add song to the playlist.');
     }
 
-    // await this._cacheService.delete(`playlist-songs:${credentialId}`);
+    await this._cacheService.delete(`playlist-songs:${credentialId}-${playlistId}`);
   }
 
   async getSongsFromPlaylist(playlistId, credentialId) {
     try {
-      const result = await this._cacheService.get(`playlist-songs:${credentialId}`);
+      const result = await this._cacheService.get(`playlist-songs:${credentialId}-${playlistId}`);
       return JSON.parse(result);
     } catch (error) {
       await this._playlistsService.verifyPlaylistAccess(playlistId, credentialId);
@@ -57,7 +57,7 @@ class PlaylistSongsService {
         })),
       };
 
-      // await this._cacheService.set(`playlist-songs:${credentialId}`, JSON.stringify(mappedResult));
+      await this._cacheService.set(`playlist-songs:${credentialId}-${playlistId}`, JSON.stringify(mappedResult));
 
       return mappedResult;
     }
@@ -77,7 +77,7 @@ class PlaylistSongsService {
       throw new NotFoundError('Failed to delete songs from playlist. Playlist ID or song ID not found.');
     }
 
-    // await this._cacheService.delete(`playlist-songs:${credentialId}`);
+    await this._cacheService.delete(`playlist-songs:${credentialId}-${playlistId}`);
   }
 
   async checkSongExist(songId) {
