@@ -77,9 +77,9 @@ const init = async () => {
   const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/images/'));
   const cacheService = new CacheService();
 
-  const albumsService = new AlbumsService();
+  const albumsService = new AlbumsService(cacheService);
   const albumLikesService = new AlbumLikesService(cacheService);
-  const songsService = new SongsService();
+  const songsService = new SongsService(cacheService);
 
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();

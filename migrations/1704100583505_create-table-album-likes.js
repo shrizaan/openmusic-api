@@ -21,8 +21,8 @@ exports.up = (pgm) => {
 
   pgm.addConstraint('album_likes', 'unique_user_id_album_id', 'UNIQUE(user_id, album_id)');
 
-  pgm.addConstraint('album_likes', 'fk_album_likes.user_id_users.id', 'FOREIGN KEY(user_id) REFERENCES users(id)');
-  pgm.addConstraint('album_likes', 'fk_album_likes.album_id_albums.id', 'FOREIGN KEY(album_id) REFERENCES albums(id)');
+  pgm.addConstraint('album_likes', 'fk_album_likes.user_id_users.id', 'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE');
+  pgm.addConstraint('album_likes', 'fk_album_likes.album_id_albums.id', 'FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {

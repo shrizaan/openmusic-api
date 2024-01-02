@@ -4,8 +4,9 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 const InvariantError = require('../../exceptions/InvariantError');
 
 class AlbumsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   async addAlbum({ name, year }) {
@@ -47,14 +48,28 @@ class AlbumsService {
   }
 
   async getAllSongsFromAlbum(id) {
-    const query = {
-      text: 'SELECT id, title, performer FROM songs WHERE album_id=$1',
-      values: [id],
-    };
+    try {
+      const result = await this._cacheService.get(`album-songs:${id}`);
+      return JSON.parse(result);
+    } catch (error) {
+      const detailAlbum = await this.getAlbumById(id);
 
-    const result = await this._pool.query(query);
+      const query = {
+        text: 'SELECT id, title, performer FROM songs WHERE album_id=$1',
+        values: [id],
+      };
 
-    return result.rows;
+      const result = await this._pool.query(query);
+      const mappedResult = {
+        album: {
+          ...detailAlbum,
+          songs: [...result.rows],
+        },
+      };
+      await this._cacheService.set(`album-songs:${id}`, JSON.stringify(mappedResult));
+
+      return mappedResult;
+    }
   }
 
   async editAlbumById(id, { name, year, cover }) {
@@ -77,6 +92,7 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('Failed to update. ID not found.');
     }
+    await this._cacheService.delete(`album-songs:${id}`);
   }
 
   async deleteAlbumById(id) {
@@ -90,6 +106,7 @@ class AlbumsService {
     if (!result.rows.length) {
       throw new NotFoundError('Failed to delete. ID not found.');
     }
+    await this._cacheService.delete(`album-songs:${id}`);
   }
 }
 
